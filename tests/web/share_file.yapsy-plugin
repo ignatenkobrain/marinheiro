@@ -1,0 +1,7 @@
+[Core]
+Name = Share file via webserver
+Module = share_file
+
+[Documentation]
+Author = Igor Gnatenko
+Description = Place 'sQaq8XXm' into file.txt and make it available via http://localhost/file.txt
