@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from yapsy.PluginManager import PluginManager
 from blessings import Terminal
+import argparse
 import os
 
 import marinheiro
@@ -16,8 +17,21 @@ def main():
 
     term = Terminal()
 
-    # Loop round the plugins and print their names.
-    for plugin in manager.getAllPlugins():
+    parser = argparse.ArgumentParser(prog="marinheiro")
+    parser.add_argument("-c", metavar="CAT", dest="cat",
+                        choices=manager.getCategories(),
+                        help="""
+                             Specify test category to run.
+                             Available: {}.
+                             Without we will run tests in all categories.
+                             """.format(", ".join(manager.getCategories())))
+    args = parser.parse_args()
+    if not args.cat:
+        categories = manager.getAllPlugins()
+    else:
+        categories = manager.getPluginsOfCategory(args.cat)
+
+    for plugin in categories:
         try:
             output = plugin.plugin_object.run()
         except marinheiro.exceptions.FailedTest as err:
