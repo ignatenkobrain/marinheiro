@@ -8,11 +8,12 @@ import marinheiro
 
 def main():
     # Load the plugins from the plugin directory.
-    manager = PluginManager()
-    manager.setPluginPlaces([os.path.join(os.path.dirname(__file__), "tests")])
-    manager.setCategoriesFilter({
-        "Web" : marinheiro.tests.WebTest,
-    })
+    manager = PluginManager(
+        plugin_info_ext="marinheiro-test",
+        directories_list=[os.path.join(os.path.dirname(__file__), "tests")],
+        categories_filter={
+            "Web" : marinheiro.tests.WebTest,
+        })
     manager.collectPlugins()
 
     term = Terminal()
