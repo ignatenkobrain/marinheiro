@@ -19,7 +19,7 @@ def main():
     term = Terminal()
 
     parser = argparse.ArgumentParser(prog="marinheiro")
-    parser.add_argument("-c", metavar="CAT", dest="cat",
+    parser.add_argument("-c", metavar="CATEGORY", dest="cat",
                         choices=manager.getCategories(),
                         help="""
                              Specify test category to run.
