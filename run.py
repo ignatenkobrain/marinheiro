@@ -12,6 +12,7 @@ class MarinheiroCmdApp(cmd2.Cmd):
             plugin_info_ext="marinheiro-test",
             directories_list=[os.path.join(os.path.dirname(__file__), "tests")],
             categories_filter={
+                "Basic" : marinheiro.tests.BasicTest,
                 "Web" : marinheiro.tests.WebTest,
             })
         self.manager.collectPlugins()

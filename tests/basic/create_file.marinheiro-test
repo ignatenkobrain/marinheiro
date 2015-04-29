@@ -1,0 +1,7 @@
+[Core]
+Name = Create empty file
+Module = create_file
+
+[Documentation]
+Author = Igor Berdiy
+Description = Create empty zero byte file.txt in /tmp
