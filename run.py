@@ -38,6 +38,8 @@ class MarinheiroCmdApp(cmd2.Cmd):
             categories = self.manager.getAllPlugins()
 
         for plugin in categories:
+            print("{}: {p.name}".format(self.colorize("Name", "bold"), p=plugin))
+            print("{}: {p.description}".format(self.colorize("Description", "bold"), p=plugin))
             try:
                 output = plugin.plugin_object.run()
             except marinheiro.exceptions.FailedTest as err:
@@ -46,8 +48,6 @@ class MarinheiroCmdApp(cmd2.Cmd):
             else:
                 status = self.colorize("PASSED", "green")
             finally:
-                print("{}: {p.name}".format(self.colorize("Name", "bold"), p=plugin))
-                print("{}: {p.description}".format(self.colorize("Description", "bold"), p=plugin))
                 print("{}: {}".format(self.colorize("Status", "bold"), status))
                 print("{}: {}".format(self.colorize("Output", "bold"), output))
                 print()
