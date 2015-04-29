@@ -1,51 +1,61 @@
 #!/usr/bin/env python3
 from yapsy.PluginManager import PluginManager
-from blessings import Terminal
-import argparse
+import cmd2
 import os
 
 import marinheiro
 
-def main():
-    # Load the plugins from the plugin directory.
-    manager = PluginManager(
-        plugin_info_ext="marinheiro-test",
-        directories_list=[os.path.join(os.path.dirname(__file__), "tests")],
-        categories_filter={
-            "Web" : marinheiro.tests.WebTest,
-        })
-    manager.collectPlugins()
+class MarinheiroCmdApp(cmd2.Cmd):
+    def __init__(self):
+        super().__init__()
+        self.manager = PluginManager(
+            plugin_info_ext="marinheiro-test",
+            directories_list=[os.path.join(os.path.dirname(__file__), "tests")],
+            categories_filter={
+                "Web" : marinheiro.tests.WebTest,
+            })
+        self.manager.collectPlugins()
 
-    term = Terminal()
-
-    parser = argparse.ArgumentParser(prog="marinheiro")
-    parser.add_argument("-c", metavar="CATEGORY", dest="cat",
-                        choices=manager.getCategories(),
-                        help="""
-                             Specify test category to run.
-                             Available: {}.
-                             Without we will run tests in all categories.
-                             """.format(", ".join(manager.getCategories())))
-    args = parser.parse_args()
-    if not args.cat:
-        categories = manager.getAllPlugins()
-    else:
-        categories = manager.getPluginsOfCategory(args.cat)
-
-    for plugin in categories:
-        try:
-            output = plugin.plugin_object.run()
-        except marinheiro.exceptions.FailedTest as err:
-            status = "{t.red}FAILED{t.normal}".format(t=term)
-            output = err.msg
+    @cmd2.options([cmd2.make_option("-c", "--category", action="store",
+                                    help="Specify test category.")])
+    def do_list(self, arg, opts=None):
+        if opts.category:
+            categories = self.manager.getPluginsOfCategory(opts.category)
         else:
-            status = "{t.green}PASSED{t.normal}".format(t=term)
-        finally:
-            print("{t.bold}Name{t.normal}: {}".format(plugin.name, t=term))
-            print("{t.bold}Description{t.normal}: {}".format(plugin.description, t=term))
-            print("{t.bold}Status{t.normal}: {}".format(status, t=term))
-            print("{t.bold}Output{t.normal}: {}".format(output, t=term))
+            categories = self.manager.getAllPlugins()
+
+        for plugin in categories:
+            print("{}: {p.name}".format(self.colorize("Name", "bold"), p=plugin))
+            print("{}: {p.description}".format(self.colorize("Description", "bold"), p=plugin))
             print()
+
+    @cmd2.options([cmd2.make_option("-c", "--category", action="store",
+                                    help="Specify test category.")])
+    def do_run(self, arg, opts=None):
+        if opts.category:
+            categories = self.manager.getPluginsOfCategory(opts.category)
+        else:
+            categories = self.manager.getAllPlugins()
+
+        for plugin in categories:
+            try:
+                output = plugin.plugin_object.run()
+            except marinheiro.exceptions.FailedTest as err:
+                status = self.colorize("FAILED", "red")
+                output = err.msg
+            else:
+                status = self.colorize("PASSED", "green")
+            finally:
+                print("{}: {p.name}".format(self.colorize("Name", "bold"), p=plugin))
+                print("{}: {p.description}".format(self.colorize("Description", "bold"), p=plugin))
+                print("{}: {}".format(self.colorize("Status", "bold"), status))
+                print("{}: {}".format(self.colorize("Output", "bold"), output))
+                print()
+
+def main():
+    cmd = MarinheiroCmdApp()
+    cmd.default_to_shell = True
+    cmd.cmdloop()
 
 if __name__ == "__main__":
     main()
